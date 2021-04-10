@@ -48,13 +48,14 @@ private:
     int insertion_strategy = 0; // 0: random; 1: basic_greedy; 2: regret
     int neighborhood_size = 0;
     int updated_agent = 0;
+    int removed_task = 0;
     float relatedness_weight1 = 0;
     float relatedness_weight2 = 0;
     std::unordered_map<int, vector<int>> best_task_sequence;
-    vector<TaskAssignment> neighbor_assignments;
+    std::unordered_map<Key, TaskAssignment*>::iterator iter;
 
     void initializeAssignmentHeap();
-    void sortNeighborsByStrategy(int insertion_strategy);
+    void sortNeighborsByStrategy();
     void addTaskAssignment();
     void updateAssignmentHeap();
 
@@ -65,8 +66,8 @@ private:
     // tool;
     int calculateMakespan(Agent agent, vector<int> task_sequence);
     int calculateFlowtime(Agent agent, vector<int> task_sequence);
-    int calculateMarginalCost(Task task, vector<int> task_sequence, int pos, Agent Agent);
+    // int calculateMarginalCost(Task task, vector<int> task_sequence, int pos, Agent Agent);
     int calculateRegretValue(Task task, vector<int> task_sequence, int pos, Agent Agent);
     int calculateManhattanDistance(int loc1, int loc2);
-    void quickSort(vector<int>& task_order, int low, int high, bool regret, bool insert);
+    void quickSort(vector<int>& task_order, int low, int high, bool insert);
 };

@@ -31,6 +31,7 @@ bool LNS::run(float time_limit, int max_iterations)
     int best_makespan = initial_makespan;
     while (initial_runtime < time_limit && iterations < max_iterations) {
         iterations++;
+        neighbors.clear();
         for (int i = 0; i < (int)tl.tasks_all.size(); i++) {
             neighbors[i] = i;
         }
@@ -38,21 +39,19 @@ bool LNS::run(float time_limit, int max_iterations)
         {
             case 0:
                 std::random_shuffle(neighbors.begin(), neighbors.end());
-                neighbors.resize(neighborhood_size);
                 break;
             case 1:
                 generateNeighborsByShawRemoval();
-                neighbors.resize(neighborhood_size);
                 break;
             case 2:
                 generateNeighborsByWorstRemoval();
-                neighbors.resize(neighborhood_size);
                 break;
             default:
                 cout << "Wrong removal strategy" << endl;
                 exit(0);
         }
-        for (Agent agent : al.agents_all) {
+        neighbors.resize(neighborhood_size);
+        for (Agent& agent : al.agents_all) {
             best_task_sequence[agent.agent_id] = agent.task_sequence;
             for (int i = 0; i < agent.task_sequence.size(); i++) {
                 if (std::find(neighbors.begin(), neighbors.end(), tl.tasks_all[agent.task_sequence[i]].task_id) != neighbors.end()) {
@@ -63,11 +62,11 @@ bool LNS::run(float time_limit, int max_iterations)
         initializeAssignmentHeap();
         for (int i = 0; i < (int)neighbors.size(); i++)
         {
-            sortNeighborsByStrategy(insertion_strategy);
+            sortNeighborsByStrategy();
             addTaskAssignment();
             updateAssignmentHeap();
         }
-        for (Agent agent : al.agents_all) {
+        for (Agent& agent : al.agents_all) {
             if (agent.task_sequence.empty()) {
                 continue;
             }
@@ -86,12 +85,12 @@ bool LNS::run(float time_limit, int max_iterations)
         //      << "runtime = " << runtime << endl;
         if (makespan < best_makespan) {
             best_task_sequence.clear();
-            for (Agent agent : al.agents_all) {
+            for (Agent& agent : al.agents_all) {
                 best_task_sequence[agent.agent_id] =  agent.task_sequence;
             }
         }
         else {
-            for (Agent agent : al.agents_all) {
+            for (Agent& agent : al.agents_all) {
                 agent.task_sequence.clear();
                 agent.task_sequence = best_task_sequence[agent.agent_id];
             }
@@ -106,8 +105,8 @@ void LNS::generateNeighborsByShawRemoval()
     Task random_task = tl.tasks_all[rand() % tl.tasks_all.size()];
     for (Agent agent : al.agents_all) {
         for (int i = 0; i < agent.task_sequence.size(); i++) {
-            Task task = tl.tasks_all[agent.task_sequence[i]];
-            Task next_task = tl.tasks_all[agent.task_sequence[i+1]];
+            Task& task = tl.tasks_all[agent.task_sequence[i]];
+            Task& next_task = tl.tasks_all[agent.task_sequence[i+1]];
             if (i == 0) {
                 delivery_time += calculateManhattanDistance(agent.start_location, task.pick_up_loc);
                 pick_up_time += calculateManhattanDistance(agent.start_location, task.pick_up_loc);
@@ -122,12 +121,12 @@ void LNS::generateNeighborsByShawRemoval()
         }
     }
     for (int i = 0; i < tl.tasks_all.size(); i++) {
-        Task task = tl.tasks_all[i];
+        Task& task = tl.tasks_all[i];
         task.relatedness = relatedness_weight1 * (calculateManhattanDistance(task.delivery_loc, random_task.delivery_loc)
             + calculateManhattanDistance(task.pick_up_loc, random_task.pick_up_loc)) + 
             + relatedness_weight2 * (std::abs(task.pick_up_time - random_task.pick_up_time) + std::abs(task.delivery_time - random_task.delivery_time));
     }
-    quickSort(neighbors, 0, neighbors.size()-1, true, false);
+    quickSort(neighbors, 0, neighbors.size()-1, false);
 
 }
 
@@ -135,15 +134,14 @@ void LNS::generateNeighborsByWorstRemoval()
 {   
     for (Agent agent : al.agents_all) {
         for (int i = 0; i < agent.task_sequence.size(); i++) {
-            Task task = tl.tasks_all[agent.task_sequence[i]];
+            Task& task = tl.tasks_all[agent.task_sequence[i]];
             vector<int> new_task_sequence = agent.task_sequence;
             new_task_sequence.erase(new_task_sequence.begin()+i);
-            task.delta_cost = std::abs(calculateMakespan(agent, agent.task_sequence) - calculateMakespan(agent, new_task_sequence));
+            task.delta_cost = calculateMakespan(agent, agent.task_sequence) - calculateMakespan(agent, new_task_sequence);
         }
     }
-    quickSort(neighbors, 0, neighbors.size()-1, true, false);
+    quickSort(neighbors, 0, neighbors.size()-1, false);
 }
-
 
 int LNS::calculateMakespan(Agent agent, vector<int> task_sequence)
 {
@@ -189,50 +187,51 @@ bool LNS::getInitialSolution()
 {
     neighbors.resize(tl.tasks_all.size());
     for (int i = 0; i < (int)tl.tasks_all.size(); i++) {
-        neighbors[i] = i;
+        neighbors[i] = tl.tasks_all[i].task_id; // double check this
     }
     initializeAssignmentHeap();
     for (int i = 0; i < (int)neighbors.size(); i++)
     {
-        sortNeighborsByStrategy(insertion_strategy);
+        sortNeighborsByStrategy();
         addTaskAssignment();
         updateAssignmentHeap();
     }
-    
+    return true;
 }
 
 void LNS::initializeAssignmentHeap()
 {
     for (auto task : neighbors) {
-        int heap_num = 0;
-        for (auto agent : al.agents_all) {
+        for (auto& agent : al.agents_all) {
             for (int i = 0; i < agent.task_sequence.size()+1; i++) {
-                int temp_cost = calculateMarginalCost(tl.tasks_all[task], agent.task_sequence, i, agent);
-                tl.tasks_all[task].ta[heap_num] = &TaskAssignment(agent.agent_id, i, temp_cost);
-                tl.tasks_all[task].assignment_heap.push(tl.tasks_all[task].ta[heap_num]);
-                heap_num++;
+                vector<int> new_task_sequence = agent.task_sequence;
+                new_task_sequence.insert(new_task_sequence.begin()+i, task);
+                int temp_cost = calculateMakespan(agent, new_task_sequence) - calculateMakespan(agent, agent.task_sequence);
+                Key agent_pos_pair (agent.agent_id, i);
+                tl.tasks_all[task].ta.insert(std::make_pair(agent_pos_pair, &TaskAssignment(agent.agent_id, i, temp_cost)));
+                tl.tasks_all[task].assignment_heap.push(tl.tasks_all[task].ta.at(agent_pos_pair));
             }
         }
     }
 }
 
-int LNS::calculateMarginalCost(Task task, vector<int> task_sequence, int pos, Agent Agent)
-{
-    if (pos == 0) {
-        return calculateManhattanDistance(task.pick_up_loc, Agent.start_location) 
-            + calculateManhattanDistance(task.pick_up_loc, task.delivery_loc)
-            + calculateManhattanDistance(task.delivery_loc, tl.tasks_all[task_sequence[1]].pick_up_loc);
-    }
-    else if (pos == task_sequence.size()) {
-        return calculateManhattanDistance(tl.tasks_all[task_sequence[task_sequence.size()]].delivery_loc, task.pick_up_loc) 
-            + calculateManhattanDistance(task.pick_up_loc, task.delivery_loc);
-    }
-    else {
-        return calculateManhattanDistance(tl.tasks_all[task_sequence[pos-1]].delivery_loc, task.pick_up_loc) 
-            + calculateManhattanDistance(task.pick_up_loc, task.delivery_loc)
-            + calculateManhattanDistance(task.delivery_loc, tl.tasks_all[task_sequence[pos+1]].pick_up_loc);
-    }
-}
+// int LNS::calculateMarginalCost(Task task, vector<int> task_sequence, int pos, Agent Agent)
+// {
+//     if (pos == 0) {
+//         return calculateManhattanDistance(task.pick_up_loc, Agent.start_location) 
+//             + calculateManhattanDistance(task.pick_up_loc, task.delivery_loc)
+//             + calculateManhattanDistance(task.delivery_loc, tl.tasks_all[task_sequence[1]].pick_up_loc);
+//     }
+//     else if (pos == task_sequence.size()) {
+//         return calculateManhattanDistance(tl.tasks_all[task_sequence[task_sequence.size()]].delivery_loc, task.pick_up_loc) 
+//             + calculateManhattanDistance(task.pick_up_loc, task.delivery_loc);
+//     }
+//     else {
+//         return calculateManhattanDistance(tl.tasks_all[task_sequence[pos-1]].delivery_loc, task.pick_up_loc) 
+//             + calculateManhattanDistance(task.pick_up_loc, task.delivery_loc)
+//             + calculateManhattanDistance(task.delivery_loc, tl.tasks_all[task_sequence[pos+1]].pick_up_loc);
+//     }
+// }
 
 int LNS::calculateManhattanDistance(int loc1, int loc2)
 {
@@ -244,21 +243,24 @@ int LNS::calculateManhattanDistance(int loc1, int loc2)
     return std::abs(loc1_x - loc2_x) + std::abs(loc1_y - loc2_y);
 }
 
-
-void LNS::sortNeighborsByStrategy(int insertion_strategy)
+void LNS::sortNeighborsByStrategy()
 {
     if (insertion_strategy = 0) {
         std::random_shuffle(neighbors.begin(), neighbors.end());
     }
     else if (insertion_strategy = 1) {
-        quickSort(neighbors, 0, neighbors.size()-1, false, false);
+        quickSort(neighbors, 0, neighbors.size()-1, true);
+    }
+    else if (insertion_strategy = 2) {
+        quickSort(neighbors, 0, neighbors.size()-1, true);
     }
     else {
-        quickSort(neighbors, 0, neighbors.size()-1, true, false);
+        cout << "Wrong insertion strategy" << endl;
+        exit(0);
     }
 }
 
-void LNS::quickSort(vector<int>& task_order, int low, int high, bool regret, bool insert)
+void LNS::quickSort(vector<int>& task_order, int low, int high, bool insert)
 {
     if (low >= high) {
         return;
@@ -272,13 +274,14 @@ void LNS::quickSort(vector<int>& task_order, int low, int high, bool regret, boo
         }
     }
     std::swap(task_order[i], task_order[high]);
-    quickSort(task_order, low, i-1, regret, insert);
-    quickSort(task_order, i+1, high, regret, insert);
+    quickSort(task_order, low, i-1, insert);
+    quickSort(task_order, i+1, high, insert);
 }
 
 void LNS::addTaskAssignment()
 {
-    Task t = tl.tasks_all[neighbors[0]];
+    Task& t = tl.tasks_all[neighbors[0]];
+    removed_task = t.task_id;
     int pos = t.assignment_heap.top()->pos;
     updated_agent = t.assignment_heap.top()->agent;
     al.agents_all[updated_agent].task_sequence.insert(al.agents_all[updated_agent].task_sequence.begin()+pos, t.task_id);
@@ -288,15 +291,13 @@ void LNS::addTaskAssignment()
 void LNS::updateAssignmentHeap()
 {
     for (auto task : neighbors) {
-        for (int i = 0; i < tl.tasks_all[task].ta.size(); i++) {
-            if (tl.tasks_all[task].ta[i]->agent == updated_agent) {
-                tl.tasks_all[task].ta.erase(tl.tasks_all[task].ta.begin()+i);
-            }
-        }
         for (int i = 0; i < al.agents_all[updated_agent].task_sequence.size()+1; i++) {
-            int temp_cost = calculateMarginalCost(tl.tasks_all[task], al.agents_all[updated_agent].task_sequence, i, al.agents_all[updated_agent]);
-            tl.tasks_all[task].ta.push_back(&TaskAssignment(al.agents_all[updated_agent].agent_id, i, temp_cost));
-            tl.tasks_all[task].assignment_heap.push(*tl.tasks_all[task].ta.end());
+            vector<int> new_task_sequence = al.agents_all[updated_agent].task_sequence;
+            new_task_sequence.insert(new_task_sequence.begin()+i, task);
+            int temp_cost = calculateMakespan(al.agents_all[updated_agent], new_task_sequence) - calculateMakespan(al.agents_all[updated_agent], al.agents_all[updated_agent].task_sequence);
+            Key agent_pos_pair (updated_agent, i);
+            tl.tasks_all[task].ta.insert(std::make_pair(agent_pos_pair, &TaskAssignment(updated_agent, i, temp_cost)));
+            tl.tasks_all[task].assignment_heap.push(tl.tasks_all[task].ta.at(agent_pos_pair));
         }
     }
 }

@@ -1,8 +1,10 @@
+
 #include <vector>
 #include <queue>
+#include <unordered_map>
 using std::vector;
 using std::priority_queue;
-
+typedef std::pair<int, int> Key;
 
 struct Task
 {
@@ -15,7 +17,7 @@ struct Task
     float relatedness;
     int pick_up_time;
     int delivery_time;
-    vector<TaskAssignment*> ta;
+    std::unordered_map<Key, TaskAssignment*> ta;
     priority_queue<TaskAssignment*, vector<TaskAssignment*>, CompareTaskAssignment> assignment_heap;
 };
 
@@ -23,16 +25,16 @@ struct TaskAssignment
 {
     int agent;
     int pos;
-    int marginal_cost;
-    TaskAssignment(int agent, int pos, int marginal_cost)
-        : agent(agent), pos(pos), marginal_cost(marginal_cost)
+    int insertion_cost;
+    TaskAssignment(int agent, int pos, int insertion_cost)
+        : agent(agent), pos(pos), insertion_cost(insertion_cost)
         {}
 };
 
 struct CompareTaskAssignment {
     bool operator()(TaskAssignment* ta1, TaskAssignment* ta2)
     {
-        return ta1->marginal_cost > ta2->marginal_cost;
+        return ta1->insertion_cost > ta2->insertion_cost;
     }
 };
 
@@ -41,20 +43,19 @@ public:
     vector<Task> tasks_all;
     static inline bool compareTask(Task& t1, Task& t2, bool insert, int insertion_strategy, int removal_strategy)
     {
-
         if (insert && insertion_strategy == 1) {
-            return t1.assignment_heap.top()->marginal_cost <= t2.assignment_heap.top()->marginal_cost;
+            return t1.assignment_heap.top()->insertion_cost <= t2.assignment_heap.top()->insertion_cost;
         }
         else if (insert && insertion_strategy == 2) {
             TaskAssignment* ta1 = t1.assignment_heap.top();
-            int t1_first_best = ta1->marginal_cost;
+            int t1_first_best = ta1->insertion_cost;
             t1.assignment_heap.pop();
-            int t1_second_best = t1.assignment_heap.top()->marginal_cost;
+            int t1_second_best = t1.assignment_heap.top()->insertion_cost;
             t1.assignment_heap.push(ta1);
             TaskAssignment* ta2 = t1.assignment_heap.top();
-            int t2_first_best = ta2->marginal_cost;
+            int t2_first_best = ta2->insertion_cost;
             t2.assignment_heap.pop();
-            int t2_second_best = t2.assignment_heap.top()->marginal_cost;
+            int t2_second_best = t2.assignment_heap.top()->insertion_cost;
             t1.assignment_heap.push(ta2);
             return t1_second_best - t1_first_best >= t2_second_best - t2_first_best;
         }

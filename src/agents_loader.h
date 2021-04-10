@@ -11,7 +11,7 @@ struct Agent
 
 class AgentsLoader{
 public:
-    vector<Agent> agents_all;
+    vector<Agent> agents_all; // agent_all store all the agent and agents_all[i] has agent_id i
 
 
 };
