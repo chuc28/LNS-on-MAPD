@@ -2,12 +2,29 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include "agents_loader.h"
+
 using std::vector;
 using std::priority_queue;
 typedef std::pair<int, int> Key;
 
-struct Task
-{
+//struct Task
+//{
+//    int task_id;
+//    int priority;
+//    int pick_up_loc;
+//    int delivery_loc;
+//    int release_time;
+//    int delta_cost;
+//    float relatedness;
+//    int pick_up_time;
+//    int delivery_time;
+//    std::unordered_map<Key, TaskAssignment*> ta;
+//    priority_queue<TaskAssignment*, vector<TaskAssignment*>, CompareTaskAssignment> assignment_heap;
+//};
+
+class Task{
+public:
     int task_id;
     int priority;
     int pick_up_loc;
@@ -19,6 +36,17 @@ struct Task
     int delivery_time;
     std::unordered_map<Key, TaskAssignment*> ta;
     priority_queue<TaskAssignment*, vector<TaskAssignment*>, CompareTaskAssignment> assignment_heap;
+    
+    int agent_id;
+//    Agent* ag;
+    unsigned int ag_arrive_start;
+    unsigned int ag_arrive_goal;
+    bool isdelivered;
+    
+    Task() {};
+    Task(int Id, int release_time, int pick_up_loc, int delivery_loc, int pick_up_time, int delivery_time)
+        :Id(Id), release_time(release_time), pick_up_loc(pick_up_loc), delivery_loc(delivery_loc), pick_up_time(pick_up_time), delivery_time(delivery_time), isdelivered(false) {}
+    ~Task() {}
 };
 
 struct TaskAssignment
@@ -40,6 +68,7 @@ struct CompareTaskAssignment {
 
 class TasksLoader{
 public:
+    int num_of_tasks;
     vector<Task> tasks_all;
     static inline bool compareTask(Task& t1, Task& t2, bool insert, int insertion_strategy, int removal_strategy)
     {
@@ -66,6 +95,7 @@ public:
             return t1.delta_cost < t2.delta_cost;
         }
     }
-
-
+    TasksLoader(const std::string fname);
+    TasksLoader();
+    ~TasksLoader();
 };
