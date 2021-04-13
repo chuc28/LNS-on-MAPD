@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
 	for(int i=0; i< 5; i++){
 		string taskfile = "./Instances/large/kiva-2000.task";
   	    string mapfile = "./Instances/large/kiva-" + agents[i] + ".map";
-        string outfile = "./output/offline/" + agents[i] + "-large" + ".out";
+        string outfile = "./output/offline/" + agents[i] + "-large" + ".txt";
 
 		AgentsLoader* al = new AgentsLoader();
 		TasksLoader* tl = new TasksLoader(taskfile);

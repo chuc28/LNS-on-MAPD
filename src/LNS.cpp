@@ -96,6 +96,15 @@ bool LNS::run(float time_limit, int max_iterations)
             }
         }
     }
+    // save output as txt file
+    int agent_num = al.agents_all.size();
+    std::ofstream outFile(outfile);
+    for (int i = 0; i < agent_num; i++) {
+        outFile << al.agents_all[i].agent_id << "\n";
+        for (const auto & e : al.agents_all[i].task_sequence) {
+            outFile << e << "\n";
+        }
+    }
 }
 
 void LNS::generateNeighborsByShawRemoval()
