@@ -17,6 +17,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 using namespace std::chrono;
+using std::string;
 typedef std::chrono::high_resolution_clock Time;
 
 class LNS
@@ -30,8 +31,9 @@ public:
     float initial_runtime = 0;
     vector<int> neighbors;
 
-    LNS(TasksLoader& tl, AgentsLoader& al, MapLoader& ml, int insertion_strategy, 
-        int removal_strategy, int neighborhood_size):
+    LNS(TasksLoader& tl, AgentsLoader& al, //MapLoader& ml, 
+        int insertion_strategy, 
+        int removal_strategy, int neighborhood_size, string outfile):
             tl(tl), al(al), ml(ml), insertion_strategy(insertion_strategy), 
             removal_strategy(removal_strategy),
             neighborhood_size(neighborhood_size){}
@@ -43,6 +45,7 @@ private:
     TasksLoader& tl;
     AgentsLoader& al;
     MapLoader& ml;
+    string outfile;
 
     int removal_strategy = 0; // 0: random; 1: shaw; 2: worst
     int insertion_strategy = 0; // 0: random; 1: basic_greedy; 2: regret
