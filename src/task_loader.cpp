@@ -1,11 +1,9 @@
-#include <vector>
 #include <utility>
 #include <sstream>
-#include <algorithm>
-#include <ctime>
+#include <fstream>
+#include <iostream>
 #include "tasks_loader.h"
 
-using namespace boost;
 using namespace std;
 
 TasksLoader::TasksLoader(){
@@ -15,16 +13,16 @@ TasksLoader::TasksLoader(){
 TasksLoader::TasksLoader(string fname){
     string line;
     ifstream myfile(fname.c_str());
-    if (myfile.is_open()){
+    if(myfile.is_open()){
         stringstream ss;
         int task_num;
         getline(myfile, line);
         ss << line;
         ss >> task_num;  // number of tasks
-        this->num_of_tasks = task_num
+        this->num_of_tasks = task_num;
         for (int i = 0; i < task_num; i++)
         {
-            int s, g, ts, tg;
+            int release_time, pick_up_loc, delivery_loc, pick_up_time, delivery_time;
             getline(myfile, line);
             ss.clear();
             ss << line;
@@ -32,11 +30,11 @@ TasksLoader::TasksLoader(string fname){
             tasks_all.push_back(Task(i, release_time, pick_up_loc, delivery_loc, pick_up_time, delivery_time));
         }
     }
-    myfile.close();
     else{
         cerr << "Task file" << fname << "not found." << endl;
         return;
     }
+    myfile.close();
 }
 
 TasksLoader::~TasksLoader() {
