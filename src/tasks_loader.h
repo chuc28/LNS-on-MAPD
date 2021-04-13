@@ -9,10 +9,10 @@ typedef std::pair<int, int> Key;
 struct Task
 {
     int task_id;
-    int priority;
     int pick_up_loc;
     int delivery_loc;
     int release_time;
+
     int delta_cost;
     float relatedness;
     int pick_up_time;
@@ -66,6 +66,5 @@ public:
             return t1.delta_cost < t2.delta_cost;
         }
     }
-
 
 };

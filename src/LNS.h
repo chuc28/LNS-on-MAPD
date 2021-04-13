@@ -13,6 +13,7 @@
 #include <iostream>
 #include <algorithm>
 #include <unordered_map>
+#include <fstream>
 using std::vector;
 using std::cout;
 using std::endl;
