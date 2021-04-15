@@ -5,7 +5,6 @@
 #pragma once
 
 #include "agents_loader.h"
-#include "map_loader.h"
 #include "tasks_loader.h"
 #include <chrono>
 #include <vector>
@@ -20,6 +19,7 @@ using std::endl;
 using namespace std::chrono;
 using std::string;
 typedef std::chrono::high_resolution_clock Time;
+typedef std::chrono::duration<float> fsec;
 
 class LNS
 {
@@ -35,17 +35,18 @@ public:
     LNS(TasksLoader& tl, AgentsLoader& al, //MapLoader& ml, 
         int insertion_strategy, 
         int removal_strategy, int neighborhood_size, string outfile):
-            tl(tl), al(al), ml(ml), insertion_strategy(insertion_strategy), 
+            tl(tl), al(al), insertion_strategy(insertion_strategy), 
             removal_strategy(removal_strategy),
-            neighborhood_size(neighborhood_size){}
-    bool run(float time_limit, int max_iterations);
+            neighborhood_size(neighborhood_size),
+            outfile(outfile) {}
+    bool run(int time_limit, int max_iterations);
     bool getInitialSolution();
 
 private:
     high_resolution_clock::time_point start_time;
     TasksLoader& tl;
     AgentsLoader& al;
-    MapLoader& ml;
+    // MapLoader& ml;
     string outfile;
 
     int removal_strategy = 0; // 0: random; 1: shaw; 2: worst
@@ -56,7 +57,8 @@ private:
     float relatedness_weight1 = 0;
     float relatedness_weight2 = 0;
     std::unordered_map<int, vector<int>> best_task_sequence;
-    std::unordered_map<Key, TaskAssignment*>::iterator iter;
+    std::unordered_map<int, vector<int>> curr_task_sequence;
+    std::map<Key, TaskAssignment*>::iterator iter;
 
     void initializeAssignmentHeap();
     void sortNeighborsByStrategy();
