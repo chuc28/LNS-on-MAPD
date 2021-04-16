@@ -29,7 +29,7 @@ TasksLoader::TasksLoader(string fname){
             ss.clear();
             ss << line;
             ss >> release_time >> pick_up_loc >> delivery_loc >> pick_up_time >> delivery_time;  // task release time, start, goal, pick up time, time at goal
-            tasks_all.push_back(Task(i, release_time, pick_up_loc, delivery_loc, pick_up_time, delivery_time));
+            tasks_all.push_back(Task(i+1, release_time, pick_up_loc, delivery_loc, pick_up_time, delivery_time));
         }
     }
     else{

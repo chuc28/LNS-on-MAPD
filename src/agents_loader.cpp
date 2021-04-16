@@ -42,11 +42,11 @@ AgentsLoader::AgentsLoader(string fname)
         char_separator<char> sep(",");
         tokenizer< char_separator<char> > tok(line, sep);
         tokenizer< char_separator<char> >::iterator beg=tok.begin();
-        int rows = atoi ((*beg).c_str());
+        int rows = atoi ((*beg).c_str())+2;
         beg++;
-        int cols = atoi ((*beg).c_str());
-        this->map_cols = cols;
-        this->map_rows = rows;
+        int cols = atoi ((*beg).c_str())+2;
+        this->map_cols = cols - 2;
+        this->map_rows = rows - 2;
 
         std::stringstream ss;
         int num_of_agents = 0;
@@ -64,19 +64,19 @@ AgentsLoader::AgentsLoader(string fname)
         ss >> maxtime;
 
         int ag = 0;
-        for (int i = 1; i < rows - 1; i++)
+        for (int i = 1; i < rows; i++)
         {
             getline(myfile, line);
-            for (int j = 1; j < cols - 1; j++)
+            for (int j = 1; j < cols; j++)
             {
-                if (line[j - 1] == 'r') //robot start location
+                if (line[j-1] == 'r') //robot start location
                 {
-                    this->agents_all[ag].Set(i*cols + j, ag);
+                    this->agents_all[ag].Set((i-1)*this->map_cols + j-1, ag+1);
                     ag++;
                 }
             }
         }
-        this->agents_all.resize(ag); // double check this
+        this->agents_all.resize(ag);
     }
     else{
         cerr << "Map file " << fname << " not found." << endl;

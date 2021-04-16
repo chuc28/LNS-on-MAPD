@@ -16,6 +16,7 @@ public:
     int agent_id;
     int start_location;
     vector<int> task_sequence;
+    int task_sequence_makespan;
     
     Agent() {};
     Agent(int start_location, int agent_id);
