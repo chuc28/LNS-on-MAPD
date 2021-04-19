@@ -10,6 +10,10 @@
 #include "tasks_loader.h"
 
 using namespace std;
+struct Endpoint{
+     int loc;
+     int id;
+};
 
 class Agent{
 public:
@@ -30,7 +34,10 @@ public:
     int map_cols;
     int map_rows;
     vector<Agent> agents_all; // agent_all store all the agent and agents_all[i] has agent_id i
+    int num_of_endpoints;
+    vector<Endpoint> endpoints;
     
+    int calculateManhattanDistance(int loc1, int loc2);
     AgentsLoader(const std::string fname);
     AgentsLoader();
     ~AgentsLoader();

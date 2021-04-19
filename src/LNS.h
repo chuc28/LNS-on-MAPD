@@ -15,6 +15,8 @@
 #include <fstream>
 #include <algorithm>
 #include <random>
+#include <ctime>
+#include <cstdlib>
 using std::vector;
 using std::cout;
 using std::endl;
@@ -36,13 +38,13 @@ public:
 
     LNS(TasksLoader& tl, AgentsLoader& al,
         int insertion_strategy, 
-        int removal_strategy,  int lns_insertion_strategy, int neighborhood_size,string outfile):
+        int removal_strategy,  int lns_insertion_strategy, int neighborhood_size, string outfile, string outStatFile):
             tl(tl), al(al), insertion_strategy(insertion_strategy), 
             removal_strategy(removal_strategy),
             lns_insertion_strategy(lns_insertion_strategy),
             // lns_removal_strategy(lns_removal_strategy),
             neighborhood_size(neighborhood_size),
-            outfile(outfile) {}
+            outfile(outfile), outStatFile(outStatFile) {}
     bool run(int time_limit, int max_iterations);
     bool getInitialSolution();
 
@@ -51,6 +53,7 @@ private:
     TasksLoader& tl;
     AgentsLoader& al;
     string outfile;
+    string outStatFile;
 
     int removal_strategy = 0; // 0: random; 1: shaw; 2: worst
     int insertion_strategy = 0; // 0: random; 1: basic_greedy; 2: regret

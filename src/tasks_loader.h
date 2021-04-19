@@ -5,6 +5,7 @@
 #include <boost/heap/priority_queue.hpp>
 #include <boost/heap/pairing_heap.hpp>
 #include <iostream>
+#include "agents_loader.h"
 
 using namespace std;
 using std::vector;
@@ -65,6 +66,7 @@ class TasksLoader{
 public:
     int num_of_tasks;
     vector<Task> tasks_all;
+    string frequency;
     static inline bool compareTask(Task& t1, Task& t2, bool insert, int insertion_strategy, int removal_strategy)
     {
         if (insert && insertion_strategy == 1) {
@@ -97,7 +99,7 @@ public:
         }
         return true;
     }
-    TasksLoader(const std::string fname);
+    TasksLoader(const std::string task_fname, const std::string map_fname);
     TasksLoader();
     // ~TasksLoader();
 };

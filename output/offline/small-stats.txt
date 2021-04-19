@@ -1,0 +1,20 @@
+=== Task Frequency 500 Agents Number 10
+LNS improves makepsan from 2485 to 2485
+LNS improves flowtime from 517946 to 517946
+Runtime 23 Iteration 0
+=== Task Frequency 500 Agents Number 20
+LNS improves makepsan from 1837 to 1837
+LNS improves flowtime from 303164 to 303164
+Runtime 10 Iteration 0
+=== Task Frequency 500 Agents Number 30
+LNS improves makepsan from 1365 to 1019
+LNS improves flowtime from 201520 to 187843
+Runtime 10 Iteration 33
+=== Task Frequency 500 Agents Number 40
+LNS improves makepsan from 961 to 586
+LNS improves flowtime from 134039 to 119474
+Runtime 10 Iteration 72
+=== Task Frequency 500 Agents Number 50
+LNS improves makepsan from 648 to 366
+LNS improves flowtime from 72409 to 71279
+Runtime 10 Iteration 121

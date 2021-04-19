@@ -42,34 +42,47 @@ AgentsLoader::AgentsLoader(string fname)
         char_separator<char> sep(",");
         tokenizer< char_separator<char> > tok(line, sep);
         tokenizer< char_separator<char> >::iterator beg=tok.begin();
-        int rows = atoi ((*beg).c_str())+2;
+        int rows = atoi ((*beg).c_str()) + 2;
         beg++;
-        int cols = atoi ((*beg).c_str())+2;
+        int cols = atoi ((*beg).c_str()) + 2;
         this->map_cols = cols - 2;
         this->map_rows = rows - 2;
 
         std::stringstream ss;
+        int num_of_endpoints = 0;
+        getline(myfile, line);
+        ss << line;
+        ss >> num_of_endpoints;
+        this->num_of_endpoints = num_of_endpoints;
+
         int num_of_agents = 0;
         getline(myfile, line);
-        getline(myfile, line);
+        ss.clear();
         ss << line;
         ss >> num_of_agents;
         this->num_of_agents = num_of_agents;
         this->agents_all.resize(num_of_agents);
+        this->endpoints.resize(num_of_endpoints);
 
-        int maxtime;
+        int maxtime = 0;
         ss.clear();
         getline(myfile, line);
         ss << line;
         ss >> maxtime;
 
-        int ag = 0;
+        int ep = 0, ag = 0;
         for (int i = 1; i < rows; i++)
         {
             getline(myfile, line);
             for (int j = 1; j < cols; j++)
-            {
-                if (line[j-1] == 'r') //robot start location
+            {   
+                if (line[j - 1] == 'e') //endpoint
+                 {
+                     this->endpoints[ep].loc = (i-1)*this->map_cols + j-1; 
+                     this->endpoints[ep].id = ep;
+                     ep++;
+                 }
+                 else if (line[j-1] == 'r') //robot start location
                 {
                     this->agents_all[ag].Set((i-1)*this->map_cols + j-1, ag+1);
                     ag++;
@@ -87,4 +100,14 @@ AgentsLoader::AgentsLoader(string fname)
 
 AgentsLoader::~AgentsLoader() {
   // vectors are on stack, so they are freed automatically
+}
+
+int AgentsLoader::calculateManhattanDistance(int loc1, int loc2)
+{
+    // transfer to x, y index
+    int loc1_x = this->endpoints[loc1].loc / this->map_cols + 1;
+    int loc1_y = this->endpoints[loc1].loc % this->map_cols + 1;
+    int loc2_x = this->endpoints[loc2].loc / this->map_cols + 1;
+    int loc2_y = this->endpoints[loc2].loc % this->map_cols + 1;
+    return std::abs(loc1_x - loc2_x) + std::abs(loc1_y - loc2_y);
 }
