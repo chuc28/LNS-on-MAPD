@@ -18,3 +18,23 @@ Runtime 10 Iteration 72
 LNS improves makepsan from 648 to 366
 LNS improves flowtime from 72409 to 71279
 Runtime 10 Iteration 121
+=== Task Frequency 500 Agents Number 10
+LNS improves makepsan from 1440 to 1161
+LNS improves flowtime from 261590 to 252732
+Runtime 30 Iteration 109
+=== Task Frequency 500 Agents Number 20
+LNS improves makepsan from 1663 to 1292
+LNS improves flowtime from 301869 to 284158
+Runtime 30 Iteration 94
+=== Task Frequency 500 Agents Number 30
+LNS improves makepsan from 1375 to 836
+LNS improves flowtime from 199087 to 185830
+Runtime 30 Iteration 190
+=== Task Frequency 500 Agents Number 40
+LNS improves makepsan from 1482 to 521
+LNS improves flowtime from 155706 to 107365
+Runtime 30 Iteration 314
+=== Task Frequency 500 Agents Number 50
+LNS improves makepsan from 427 to 341
+LNS improves flowtime from 63170 to 67209
+Runtime 30 Iteration 445

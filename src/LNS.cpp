@@ -287,16 +287,6 @@ void LNS::initializeAssignmentHeap()
     }
 }
 
-// int LNS::calculateManhattanDistance(int loc1, int loc2)
-// {
-//     // transfer to x, y index
-//     int loc1_x = loc1 / al.map_cols + 1;
-//     int loc1_y = loc1 % al.map_cols + 1;
-//     int loc2_x = loc2 / al.map_cols + 1;
-//     int loc2_y = loc2 % al.map_cols + 1;
-//     return std::abs(loc1_x - loc2_x) + std::abs(loc1_y - loc2_y);
-// }
-
 void LNS::sortNeighborsByStrategy(int curr_insertion_strategy)
 {
     if (curr_insertion_strategy == 0) {

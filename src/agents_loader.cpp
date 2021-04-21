@@ -78,13 +78,13 @@ AgentsLoader::AgentsLoader(string fname)
             {   
                 if (line[j - 1] == 'e') //endpoint
                  {
-                     this->endpoints[ep].loc = (i-1)*this->map_cols + j-1; 
+                     this->endpoints[ep].loc = i*this->map_cols + j; 
                      this->endpoints[ep].id = ep;
                      ep++;
                  }
                  else if (line[j-1] == 'r') //robot start location
                 {
-                    this->agents_all[ag].Set((i-1)*this->map_cols + j-1, ag+1);
+                    this->agents_all[ag].Set(i*this->map_cols + j, ag+1);
                     ag++;
                 }
             }
@@ -105,9 +105,9 @@ AgentsLoader::~AgentsLoader() {
 int AgentsLoader::calculateManhattanDistance(int loc1, int loc2)
 {
     // transfer to x, y index
-    int loc1_x = this->endpoints[loc1].loc / this->map_cols + 1;
-    int loc1_y = this->endpoints[loc1].loc % this->map_cols + 1;
-    int loc2_x = this->endpoints[loc2].loc / this->map_cols + 1;
-    int loc2_y = this->endpoints[loc2].loc % this->map_cols + 1;
+    int loc1_x = this->endpoints[loc1].loc / this->map_cols;
+    int loc1_y = this->endpoints[loc1].loc % this->map_cols;
+    int loc2_x = this->endpoints[loc2].loc / this->map_cols;
+    int loc2_y = this->endpoints[loc2].loc % this->map_cols;
     return std::abs(loc1_x - loc2_x) + std::abs(loc1_y - loc2_y);
 }
