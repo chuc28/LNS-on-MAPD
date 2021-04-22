@@ -5,13 +5,14 @@
 #include "LNS.h"
 using std::string;
 
-string agents[5] = {"10", "20", "30", "40", "50"};
+// string agents[5] = {"10", "20", "30", "40", "50"};
 string tasks[5] = {"500"};
+string agents[5] = {"10"};
 
 int main(int argc, char** argv) {
 	for (int j = 0; j < 1; j++) {
 		string taskfile = "../Instances/small/kiva-" + tasks[j] + ".task";
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < 1; i++) {
   	    	string mapfile = "../Instances/small/kiva-" + agents[i] + "-500-5.map";
         	string outfile = "../output/offline/" + agents[i] + "-small-" + tasks[j] + ".txt";
 			string outStatFile = "../output/offline/small-stats.txt";

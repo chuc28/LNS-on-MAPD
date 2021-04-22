@@ -92,11 +92,6 @@ bool LNS::run(int time_limit, int max_iterations)
             }
         }
         runtime = ((fsec)(Time::now() - curr_time)).count();
-        // cout << "Iteration " << iterations << ", " 
-        //      << "Neighborhood size " << neighborhood_size << ", "
-        //      << "Makespan = " << makespan << ", "
-        //      << "Flowtime = " << flowtime << ", "
-        //      << "runtime = " << runtime << endl;
         if (makespan < best_makespan) {
             best_task_sequence.clear();
             for (Agent& agent : al.agents_all) {
@@ -104,6 +99,10 @@ bool LNS::run(int time_limit, int max_iterations)
             }
             best_makespan = makespan;
             best_flowtime = flowtime;
+            cout << "Iteration " << iterations << ", " 
+             << "Neighborhood size " << neighborhood_size << ", "
+             << "Makespan = " << makespan << ", "
+             << "Flowtime = " << flowtime << endl;
         }
         else {
             for (Agent& agent : al.agents_all) {
@@ -206,13 +205,13 @@ int LNS::calculateMakespan(Agent agent, vector<int> task_sequence)
         Task& task = tl.tasks_all[task_sequence[i]-1];
         if (i == 0) {
             makespan += al.calculateManhattanDistance(agent.start_location, task.pick_up_loc);
-            makespan = std::max(task.release_time, makespan); // same as TA-Prioritized
+            // makespan = std::max(task.release_time, makespan); // same as TA-Prioritized
         }
         makespan += al.calculateManhattanDistance(task.pick_up_loc, task.delivery_loc);
         if (i != task_sequence.size()-1 ) {
             Task& next_task = tl.tasks_all[task_sequence[i+1]-1];
             makespan += al.calculateManhattanDistance(task.delivery_loc, next_task.pick_up_loc);
-            makespan = std::max(next_task.release_time, makespan);
+            // makespan = std::max(next_task.release_time, makespan);
         }
     }
     return makespan;

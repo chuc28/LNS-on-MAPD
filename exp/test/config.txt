@@ -1,0 +1,12 @@
+map: maps/kiva-10-500-5
+#drives: 10
+seed: 0
+solver: PBS
+time_limit: 120
+simulation_window: 50
+planning_window: 50
+simulation_time: 1500
+robust: 0
+rotate: 0
+use_dummy_paths: 0
+hold_endpoints: 0

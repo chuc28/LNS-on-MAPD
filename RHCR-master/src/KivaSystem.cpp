@@ -218,45 +218,23 @@ void KivaSystem::update_goal_locations()
 					min_timesteps = std::max(min_timesteps, goal.second - timestep);
 					goal = next;
 				}
+				// if (task_sequences[k].empty()) {
+				// 	cout << "Agent " << k << " has finished its task sequence" << 
+				// 		" with path length " << paths[k].size() <<endl;
+				// }
 				if (goal_locations[k].empty())
 				{
-					cout << k << endl; // issue!
-					goal_locations[k].emplace_back(G.agent_home_locations[k], 0);
+					// if (useDummyPaths) {
+					int next = G.endpoints[rand() % (int)G.endpoints.size()];
+					// 	} while (next == curr);
+					goal_locations[k].emplace(goal_locations[k].begin(), next, 0);
+					// 	new_agents.emplace_back(k);
+					// }
+					// else 
+					// { // issue!""
+						goal_locations[k].emplace_back(G.agent_home_locations[k], 0);
+					// }
 				}
-			// else
-			// {
-			// 	pair<int, int> goal; // The last goal location
-			// 	if (goal_locations[k].empty())
-			// 	{
-			// 		goal = make_pair(curr, 0);
-			// 	}
-			// 	else
-			// 	{
-			// 		goal = goal_locations[k].back();
-			// 	}
-			// 	double min_timesteps = G.get_Manhattan_distance(goal.first, curr); // G.heuristics.at(goal)[curr];
-			// 	while (min_timesteps <= simulation_window)
-			// 		// The agent might finish its tasks during the next planning horizon
-			// 	{
-			// 		// assign a new task
-			// 		pair<int, int> next;
-			// 		if (G.types[goal.first] == "Endpoint")
-			// 		{
-			// 			do
-			// 			{
-			// 				next = make_pair(G.endpoints[rand() % (int)G.endpoints.size()], 0);
-			// 			} while (next == goal);
-			// 		}
-			// 		else
-			// 		{
-			// 			std::cout << "ERROR in update_goal_function()" << std::endl;
-			// 			std::cout << "The fiducial type should not be " << G.types[curr] << std::endl;
-			// 			exit(-1);
-			// 		}
-			// 		goal_locations[k].emplace_back(next);
-			// 		min_timesteps += G.get_Manhattan_distance(next.first, goal.first); // G.heuristics.at(next)[goal];
-			// 		goal = next;
-			// 	}
 			}
 		}
 	}
@@ -264,9 +242,14 @@ void KivaSystem::update_goal_locations()
 
 void KivaSystem::simulate(int simulation_time)
 {
+	std::clock_t c_start = std::clock();
 	std::cout << "*** Simulating " << seed << " ***" << std::endl;
 	this->simulation_time = simulation_time;
 	initialize();
+	vector<int> path_len;
+	for (int i = 0; i < num_of_drives; i++) {
+		path_len.push_back(0);
+	}
 
 	for (; timestep < simulation_time; timestep += simulation_window)
 	{
@@ -295,7 +278,7 @@ void KivaSystem::simulate(int simulation_time)
 		{
 			std::cout << num_of_tasks - old << " tasks just finished" << std::endl;
 			std::cout << num_of_tasks << " tasks finished in total" << std::endl;
-			std::cout << task_sequences.size() << " paths remain" << std::endl;
+			// std::cout << task_sequences.size() << " paths remain" << std::endl;
 		}
 
 		if (congested())
@@ -303,10 +286,22 @@ void KivaSystem::simulate(int simulation_time)
 			cout << "***** Too many traffic jams ***" << endl;
 			break;
 		}
-	}
 
+		int k = 0;
+		for (; k < num_of_drives; k++) {
+			if (task_sequences[k].empty() && path_len[k] == 0) {
+				path_len[k] = paths[k].size();
+				cout << "Agent " << k << " has finished its task sequence" << 
+					" with path length " << path_len[k] <<endl;
+			}
+		}
+	}
+	
 	update_start_locations();
-	std::cout << std::endl << "Done! " <<  std::endl;
+	std::clock_t c_end = std::clock();
+	std::cout << std::endl << "Done! " << std::endl;
+	int max = *std::max_element(path_len.begin(), path_len.end());
+	cout<< "Makespan:  " << max << " Runtime: " << 1.0 * (c_end - c_start) / CLOCKS_PER_SEC << " s" << endl;
 	save_results();
 }
 

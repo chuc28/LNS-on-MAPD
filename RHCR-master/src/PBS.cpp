@@ -784,18 +784,14 @@ bool PBS::run(const vector<State>& starts,
         exit(-1);
 	}
     min_sum_of_costs = 0;
-    int curr_makespan = 0;
     for (int i = 0; i < num_of_agents; i++)
     {
         int start = starts[i].location;
-        int curr_makespan = 0;
         for (const auto& goal : goal_locations[i])
         {
-            curr_makespan += G.heuristics.at(goal.first)[start];
             min_sum_of_costs += G.heuristics.at(goal.first)[start];
             start = goal.first;
         }
-        max_makespan = std::max(curr_makespan, max_makespan);
     }
 	if (screen > 0) // 1 or 2
 		print_results();

@@ -502,10 +502,8 @@ void BasicSystem::save_results()
     // paths
     output.open(outfile + "\\paths.txt", std::ios::out);
     output << num_of_drives << std::endl;
-    int sol_makespan = 0; //  added by Jackie
     for (int k = 0; k < num_of_drives; k++)
     {
-        sol_makespan = max(sol_makespan, (int)paths[k].size()); //  added by Jackie
         for (auto p : paths[k])
         {
             if (p.timestep <= timestep)
@@ -513,7 +511,6 @@ void BasicSystem::save_results()
         }
         output << std::endl;
     }
-    cout << sol_makespan << endl; //  added by Jackie
     output.close();
     saving_time = (std::clock() - t) / CLOCKS_PER_SEC;
 	if (screen)
