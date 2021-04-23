@@ -11,6 +11,9 @@ bool LNS::run(int time_limit, int max_iterations)
     if (!getInitialSolution()) {
         return false;
     }
+    string output_file = "../output/offline/" + to_string(insertion_strategy) + 
+            "-" + to_string(removal_strategy) +  "-" + to_string(lns_insertion_strategy) + ".txt";
+    std::ofstream outFile(output_file);
 
     initial_makespan = al.curr_assignment_makespan;
     initial_runtime = ((fsec)(Time::now() - start_time)).count();
@@ -18,6 +21,11 @@ bool LNS::run(int time_limit, int max_iterations)
     cout << "Initial makespan = " << initial_makespan << ", "
         << "Initial flowtime = " << initial_flowtime << ", "
         << "runtime = " << initial_runtime << endl;
+    
+    outFile << "Initial makespan = " << initial_makespan << ", " 
+            << "Initial flowtime = " << initial_flowtime << ", " 
+            << "runtime = " << initial_runtime << "\n";
+
 
     int iterations = 0;
     int best_makespan = initial_makespan;
@@ -80,10 +88,18 @@ bool LNS::run(int time_limit, int max_iterations)
             }
             best_makespan = makespan;
             best_flowtime = flowtime;
+            runtime = ((fsec)(Time::now() - start_time)).count();
             cout << "Iteration " << iterations << ", " 
              << "Neighborhood size " << neighborhood_size << ", "
              << "Makespan = " << makespan << ", "
-             << "Flowtime = " << flowtime << endl;
+             << "Flowtime = " << flowtime << ", "
+             << "Runtime = " << runtime << endl;
+
+            outFile << "Iteration " << iterations << ", " 
+                   << "Neighborhood size " << neighborhood_size << ", "
+                   << "Makespan = " << makespan << ", "
+                   << "Flowtime = " << flowtime << ", "
+                   << "Runtime = " << runtime << endl;
         }
         else {
             for (Agent& agent : al.agents_all) {
@@ -92,6 +108,7 @@ bool LNS::run(int time_limit, int max_iterations)
             }
         }
     }
+    outFile.close();
     runtime = ((fsec)(Time::now() - start_time)).count();
     // cout << "LNS improves makepsan from " << initial_makespan 
     //     << " to " << best_makespan << endl;
@@ -101,7 +118,8 @@ bool LNS::run(int time_limit, int max_iterations)
 
     // save output as txt file
     int agent_num = al.agents_all.size();
-    std::ofstream outFile(outfile);
+    //std::ofstream outFile(outfile);
+    outFile.open(outfile, std::ios_base::app);
     for (int i = 0; i < agent_num; i++) {
         outFile << al.agents_all[i].agent_id << " " << al.agents_all[i].start_location << "\n";
         for (int e : al.agents_all[i].task_sequence) {
@@ -162,6 +180,7 @@ int LNS::generateNeighborsByWorstRemoval()
             for (auto& temp_agent : al.agents_all) {
                 if (temp_agent.agent_id != agent.agent_id) {
                     curr_assignment_makespan = std::max(temp_agent.task_sequence_makespan, curr_assignment_makespan);
+                    
                 }
                 else {
                     curr_assignment_makespan = std::max(temp_cost, curr_assignment_makespan);
@@ -313,6 +332,7 @@ void LNS::addTaskAssignment()
     removed_task = t.task_id;
     int pos = t.assignment_heap.top().pos;
     updated_agent = t.assignment_heap.top().agent;
+    //cout << "updated agent :" << updated_agent << endl;
     al.agents_all[updated_agent-1].task_sequence.insert(al.agents_all[updated_agent-1].task_sequence.begin()+pos, t.task_id);
     neighbors.erase(neighbors.begin());
 }
@@ -326,6 +346,8 @@ void LNS::updateAssignmentHeap()
         curr_cost = calculateMakespan(al.agents_all[updated_agent-1], al.agents_all[updated_agent-1].task_sequence);
     }
     al.agents_all[updated_agent-1].task_sequence_makespan = curr_cost;
+    // cout << "task_sequence_makespan :" << al.curr_assignment_makespan << endl;
+    // cout << "curr_cost :" << curr_cost << endl;
     al.curr_assignment_makespan = std::max(curr_cost, al.curr_assignment_makespan);
 
     for (auto task : neighbors) {
