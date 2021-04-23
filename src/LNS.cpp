@@ -11,17 +11,8 @@ bool LNS::run(int time_limit, int max_iterations)
     if (!getInitialSolution()) {
         return false;
     }
-    for (Agent& agent : al.agents_all) {
-        if (agent.task_sequence.empty()) {
-            continue;
-        }
-        else {
-            int curr_makespan = calculateMakespan(agent, agent.task_sequence);
-            initial_makespan = std::max(curr_makespan, initial_makespan);
-            int curr_flowtime = calculateFlowtime(agent, agent.task_sequence);
-            initial_flowtime += curr_flowtime;
-        }
-    }
+
+    initial_makespan = al.curr_assignment_makespan;
     initial_runtime = ((fsec)(Time::now() - start_time)).count();
 
     cout << "Initial makespan = " << initial_makespan << ", "
@@ -31,7 +22,6 @@ bool LNS::run(int time_limit, int max_iterations)
     int iterations = 0;
     int best_makespan = initial_makespan;
     int best_flowtime = initial_flowtime;
-    // srand(time(0));
 
     while (((fsec)(Time::now()- start_time)).count() < time_limit) {
         high_resolution_clock::time_point curr_time = Time::now();
@@ -49,8 +39,8 @@ bool LNS::run(int time_limit, int max_iterations)
                 break;
             case 1:
                 generateNeighborsByShawRemoval();
+                // neighborhood_size = neighborhood_size / pow(2, std::min(5, iterations / 10));
                 neighbors.resize(neighborhood_size);
-                // neighbors.resize(neighborhood_size / pow(2, std::min(5, iterations / 100)));
                 // neighbors.resize(int(tl.tasks_all.size()*r));
                 break;
             case 2:
@@ -80,17 +70,8 @@ bool LNS::run(int time_limit, int max_iterations)
         }
         int makespan = 0;
         int flowtime = 0;
-        for (Agent& agent : al.agents_all) {
-            if (agent.task_sequence.empty()) {
-                continue;
-            }
-            else {
-                int curr_makespan = agent.task_sequence_makespan;
-                makespan = std::max(curr_makespan, makespan);
-                int curr_flowtime = calculateFlowtime(agent, agent.task_sequence);
-                flowtime += curr_flowtime;
-            }
-        }
+
+        makespan = al.curr_assignment_makespan;
         runtime = ((fsec)(Time::now() - curr_time)).count();
         if (makespan < best_makespan) {
             best_task_sequence.clear();
@@ -149,11 +130,10 @@ void LNS::generateNeighborsByShawRemoval()
         for (int i = 0; i < agent.task_sequence.size(); i++) {
             Task& task = tl.tasks_all[agent.task_sequence[i]-1];
             if (i == 0) {
-                pick_up_time += al.calculateManhattanDistance(agent.start_location, task.pick_up_loc);
+                pick_up_time += al.calculateManhattanDistance_agentToTask(agent.start_location, task.pick_up_loc);
             }
             task.pick_up_time = std::max(pick_up_time, task.release_time);
             task.delivery_time = task.pick_up_time + al.calculateManhattanDistance(task.pick_up_loc, task.delivery_loc);
-            delivery_time = task.delivery_time;
             if (i != agent.task_sequence.size()-1) {
                 Task& next_task = tl.tasks_all[agent.task_sequence[i+1]-1];
                 pick_up_time = task.delivery_time + al.calculateManhattanDistance(task.delivery_loc, next_task.pick_up_loc);
@@ -177,23 +157,20 @@ int LNS::generateNeighborsByWorstRemoval()
             Task& task = tl.tasks_all[agent.task_sequence[i]];
             vector<int> new_task_sequence = agent.task_sequence;
             new_task_sequence.erase(new_task_sequence.begin()+i);
-            task.delta_cost = calculateMakespan(agent, agent.task_sequence) - calculateMakespan(agent, new_task_sequence);
+            int temp_cost = calculateMakespan(agent, agent.task_sequence);
+            int curr_assignment_makespan = 0;
+            for (auto& temp_agent : al.agents_all) {
+                if (temp_agent.agent_id != agent.agent_id) {
+                    curr_assignment_makespan = std::max(temp_agent.task_sequence_makespan, curr_assignment_makespan);
+                }
+                else {
+                    curr_assignment_makespan = std::max(temp_cost, curr_assignment_makespan);
+                }
+            }
+            task.delta_cost = al.curr_assignment_makespan - curr_assignment_makespan;
         }
     }
-    // int max_agent_id = 0;
-    // int max_ta_len = 0;
-    // for (Agent& agent : al.agents_all) {
-    //     if (agent.task_sequence.size() > max_ta_len) {
-    //         max_agent_id = agent.agent_id;
-    //         max_ta_len = agent.task_sequence.size();
-    //     }
-    //     for (int i = 0; i < agent.task_sequence.size(); i++) {
-    //         Task& task = tl.tasks_all[agent.task_sequence[i]];
-    //     //     vector<int> new_task_sequence = agent.task_sequence;
-    //     //     new_task_sequence.erase(new_task_sequence.begin()+i);
-    //         task.delta_cost = agent.task_sequence_makespan;
-    //     }
-    // }
+
     quickSort(neighbors, 0, neighbors.size()-1, false, insertion_strategy, removal_strategy);
     return 0;
 }
@@ -204,14 +181,14 @@ int LNS::calculateMakespan(Agent agent, vector<int> task_sequence)
     for (int i = 0; i < task_sequence.size(); i++) {
         Task& task = tl.tasks_all[task_sequence[i]-1];
         if (i == 0) {
-            makespan += al.calculateManhattanDistance(agent.start_location, task.pick_up_loc);
-            // makespan = std::max(task.release_time, makespan); // same as TA-Prioritized
+            makespan = al.calculateManhattanDistance_agentToTask(agent.start_location, task.pick_up_loc);
+            makespan = std::max(task.release_time, makespan); // same as TA-Prioritized
         }
         makespan += al.calculateManhattanDistance(task.pick_up_loc, task.delivery_loc);
         if (i != task_sequence.size()-1 ) {
             Task& next_task = tl.tasks_all[task_sequence[i+1]-1];
             makespan += al.calculateManhattanDistance(task.delivery_loc, next_task.pick_up_loc);
-            // makespan = std::max(next_task.release_time, makespan);
+            makespan = std::max(next_task.release_time, makespan);
         }
     }
     return makespan;
@@ -227,11 +204,10 @@ int LNS::calculateFlowtime(Agent agent, vector<int> task_sequence)
         Task& next_task = tl.tasks_all[task_sequence[i+1]-1];
         sum_of_release_time += task.release_time;
         if (i == 0) {
-            delivery_time += al.calculateManhattanDistance(agent.start_location, task.pick_up_loc);
+            delivery_time += al.calculateManhattanDistance_agentToTask(agent.start_location, task.pick_up_loc);
             delivery_time = std::max(delivery_time, task.release_time);
         }
         delivery_time += al.calculateManhattanDistance(task.pick_up_loc, task.delivery_loc);
-        // cout << delivery_time << endl;
         sum_of_delivery_time += delivery_time;
         delivery_time += al.calculateManhattanDistance(task.delivery_loc, next_task.pick_up_loc);
         delivery_time = std::max(delivery_time, next_task.release_time);
@@ -263,20 +239,33 @@ bool LNS::getInitialSolution()
 
 void LNS::initializeAssignmentHeap()
 {
+    // initialize makespan for current assignment
+    int curr_assignment_makespan = 0;
+    for (auto& agent : al.agents_all) {
+        if (agent.task_sequence.size() == 0) {
+            agent.task_sequence_makespan = 0;
+        }
+        else {
+            agent.task_sequence_makespan = calculateMakespan(agent, agent.task_sequence);
+        }
+        curr_assignment_makespan = std::max(agent.task_sequence_makespan, curr_assignment_makespan);
+    }
+    al.curr_assignment_makespan = curr_assignment_makespan;
+
     for (int task : neighbors) {
         tl.tasks_all[task-1].ta.clear();
         tl.tasks_all[task-1].assignment_heap.clear();
         for (auto& agent : al.agents_all) {
-            if (agent.task_sequence.size() == 0) {
-                agent.task_sequence_makespan = 0;
-            }
-            else {
-                agent.task_sequence_makespan = calculateMakespan(agent, agent.task_sequence);
-            }
             for (int i = 0; i < agent.task_sequence.size()+1; i++) {
                 vector<int> new_task_sequence = agent.task_sequence;
                 new_task_sequence.insert(new_task_sequence.begin()+i, task);
-                int temp_cost = calculateMakespan(agent, new_task_sequence) - agent.task_sequence_makespan;
+                int temp_cost = calculateMakespan(agent, new_task_sequence);
+                if (temp_cost > al.curr_assignment_makespan) {
+                    temp_cost = temp_cost - al.curr_assignment_makespan;
+                }
+                else {
+                    temp_cost = 0;
+                }
                 Key agent_pos_pair(agent.agent_id, i);
                 TaskAssignment task_assignment(agent.agent_id, i, temp_cost);
                 handle_t handle = tl.tasks_all[task-1].assignment_heap.push(task_assignment);
@@ -324,24 +313,32 @@ void LNS::addTaskAssignment()
     removed_task = t.task_id;
     int pos = t.assignment_heap.top().pos;
     updated_agent = t.assignment_heap.top().agent;
-    // cout << updated_agent << endl;
     al.agents_all[updated_agent-1].task_sequence.insert(al.agents_all[updated_agent-1].task_sequence.begin()+pos, t.task_id);
     neighbors.erase(neighbors.begin());
 }
 
 void LNS::updateAssignmentHeap()
 {
+    // update makespan for current assignment
     int curr_cost = 0;
     int temp_size = al.agents_all[updated_agent-1].task_sequence.size();
     if (temp_size > 0) {
         curr_cost = calculateMakespan(al.agents_all[updated_agent-1], al.agents_all[updated_agent-1].task_sequence);
     }
     al.agents_all[updated_agent-1].task_sequence_makespan = curr_cost;
+    al.curr_assignment_makespan = std::max(curr_cost, al.curr_assignment_makespan);
+
     for (auto task : neighbors) {
         for (int i = 0; i < temp_size + 1; i++) {
             vector<int> new_task_sequence = al.agents_all[updated_agent-1].task_sequence;
             new_task_sequence.insert(new_task_sequence.begin()+i, task);
-            int temp_cost = calculateMakespan(al.agents_all[updated_agent-1], new_task_sequence) - curr_cost;
+            int temp_cost = calculateMakespan(al.agents_all[updated_agent-1], new_task_sequence);
+            if (temp_cost > al.curr_assignment_makespan) {
+                temp_cost = temp_cost - al.curr_assignment_makespan;
+            }
+            else {
+                temp_cost = 0;
+            }
             Key agent_pos_pair(updated_agent, i);
             if (tl.tasks_all[task-1].ta.find(agent_pos_pair) != tl.tasks_all[task-1].ta.end()) {
                 handle_t handle = tl.tasks_all[task-1].ta[agent_pos_pair];

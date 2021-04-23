@@ -111,3 +111,13 @@ int AgentsLoader::calculateManhattanDistance(int loc1, int loc2)
     int loc2_y = this->endpoints[loc2].loc % this->map_cols;
     return std::abs(loc1_x - loc2_x) + std::abs(loc1_y - loc2_y);
 }
+
+int AgentsLoader::calculateManhattanDistance_agentToTask(int loc1, int loc2)
+{
+    // transfer to x, y index
+    int loc1_x = loc1 / this->map_cols;
+    int loc1_y = loc1 % this->map_cols;
+    int loc2_x = this->endpoints[loc2].loc / this->map_cols;
+    int loc2_y = this->endpoints[loc2].loc % this->map_cols;
+    return std::abs(loc1_x - loc2_x) + std::abs(loc1_y - loc2_y);
+}

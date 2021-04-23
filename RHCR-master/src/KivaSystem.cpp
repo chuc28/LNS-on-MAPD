@@ -225,14 +225,16 @@ void KivaSystem::update_goal_locations()
 				if (goal_locations[k].empty())
 				{
 					// if (useDummyPaths) {
-					int next = G.endpoints[rand() % (int)G.endpoints.size()];
-					// 	} while (next == curr);
+					int next;
+					do {
+						next = G.endpoints[rand() % (int)G.endpoints.size()];
+					} while (next == curr);
 					goal_locations[k].emplace(goal_locations[k].begin(), next, 0);
 					// 	new_agents.emplace_back(k);
 					// }
 					// else 
 					// { // issue!""
-						goal_locations[k].emplace_back(G.agent_home_locations[k], 0);
+					goal_locations[k].emplace_back(G.agent_home_locations[k], 0);
 					// }
 				}
 			}

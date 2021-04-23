@@ -6,7 +6,7 @@
 using std::string;
 
 // string agents[5] = {"10", "20", "30", "40", "50"};
-string tasks[5] = {"500"};
+string tasks[5] = {"2"};
 string agents[5] = {"10"};
 
 int main(int argc, char** argv) {

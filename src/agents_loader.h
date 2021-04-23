@@ -36,8 +36,10 @@ public:
     vector<Agent> agents_all; // agent_all store all the agent and agents_all[i] has agent_id i
     int num_of_endpoints;
     vector<Endpoint> endpoints;
+    int curr_assignment_makespan;
     
     int calculateManhattanDistance(int loc1, int loc2);
+    int calculateManhattanDistance_agentToTask(int loc1, int loc2);
     AgentsLoader(const std::string fname);
     AgentsLoader();
     ~AgentsLoader();
