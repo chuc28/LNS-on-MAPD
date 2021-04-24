@@ -2,17 +2,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import MultipleLocator
 
+# label=["Random Removal", "Shaw Removal", "Worst Removal"]
+# label=["Random Insertion", "Greedy Insertion", "Regret Insertion"]
+label=["Size 8", "Size 16", "Size 32", "Size 64", "Size 128"]
+
 def plot_makespan(file_list, compare_num):
     makespan_list = []
-    runtime_list =[] 
-    label =[]
+    runtime_list = []
+    first_line = []
     lines = []
     for file in file_list:
-        with open(file, "r") as f: 
-            lines.append(f.readlines()[1:]) 
-    for line in lines:
+        with open(file, "r") as f:
+            first_line.append(f.readlines()[0])
+        with open(file, "r") as f:
+            lines.append(f.readlines()[1:])
+            
+    for i, line in enumerate(lines):
         makespan = []
         runtime =[]
+        makespan.append(int((first_line[i].split(", ")[0]).split(" ")[3]))
+        runtime.append(float(((first_line[i].split(", ")[2]).split(" ")[2]).strip()))
         for piece in line:
             makespan.append(int((piece.split(", ")[2]).split(" ")[2]))
             runtime.append(int((piece.split(", ")[4]).split(" ")[2]))
@@ -22,21 +31,28 @@ def plot_makespan(file_list, compare_num):
 #     print(runtime_list)
     fig, ax = plt.subplots()
     for i in range(compare_num):
-        label.append((file_list[i].split("/")[3]).split(".")[0])
-        ax.plot(runtime_list[i], makespan_list[i], label=label[i])
-    x_major_locator = MultipleLocator(50)
-    y_major_locator = MultipleLocator(200)
+        #label.append((file_list[i].split("/")[4]).split(".")[0])
+        ax.plot(runtime_list[i], makespan_list[i], 'o')
+#     x_major_locator = MultipleLocator(50)
+#     y_major_locator = MultipleLocator(500)
     ax = plt.gca()
     ax.xaxis.set_major_locator(x_major_locator)
     ax.yaxis.set_major_locator(y_major_locator)
-    plt.legend(label, loc='upper right', fontsize=8)
-    fig.suptitle('Makespan improvement with different heuristic')
-    plt.xlabel('Runtime')
-    plt.ylabel('Makespan')
+    plt.tick_params(labelsize=12)
+    plt.legend(label, loc='upper right', fontsize = 14)
+    fig.suptitle('Task Frequency = 1, Agent Number = 30', fontsize=16)
+    plt.xlabel('Runtime', fontsize=14)
+    plt.ylabel('Makespan', fontsize=14)
+    plt.grid(linestyle='-.')
+    plt.rcParams['savefig.dpi'] = 300
+    plt.rcParams['figure.dpi'] = 300
     plt.show()
-    fig.savefig('../output/offline/fig.jpg')
+    fig.savefig('../output/offline1/task-1-agent-30/neighbourhood_t1a30.png')
     
-f1 = "../output/offline/1-0-0.txt"
-f2 = "../output/offline/1-1-0.txt"
-file_list = [f1, f2]
-plot_makespan(file_list, 2)
+f1 = "../output/offline1/task-1-agent-30/size-8.txt"
+f2 = "../output/offline1/task-1-agent-30/size-16.txt"
+f3 = "../output/offline1/task-1-agent-30/size-32.txt"
+f4 = "../output/offline1/task-1-agent-30/size-64.txt"
+f5 = "../output/offline1/task-1-agent-30/size-128.txt"
+file_list = [f1, f2, f3, f4, f5]
+plot_makespan(file_list, 5)
