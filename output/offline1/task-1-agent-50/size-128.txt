@@ -1,0 +1,18 @@
+Initial makespan = 5580, Initial flowtime = 0, runtime = 182.648
+Iteration 1, Neighborhood size 128, Makespan = 4486, Flowtime = 0, Runtime = 187
+Iteration 2, Neighborhood size 128, Makespan = 3328, Flowtime = 0, Runtime = 192
+Iteration 3, Neighborhood size 128, Makespan = 2636, Flowtime = 0, Runtime = 196
+Iteration 4, Neighborhood size 128, Makespan = 1999, Flowtime = 0, Runtime = 198
+Iteration 5, Neighborhood size 128, Makespan = 1621, Flowtime = 0, Runtime = 201
+Iteration 6, Neighborhood size 128, Makespan = 1286, Flowtime = 0, Runtime = 204
+Iteration 7, Neighborhood size 128, Makespan = 1162, Flowtime = 0, Runtime = 206
+Iteration 8, Neighborhood size 128, Makespan = 1049, Flowtime = 0, Runtime = 208
+Iteration 9, Neighborhood size 128, Makespan = 919, Flowtime = 0, Runtime = 210
+Iteration 10, Neighborhood size 128, Makespan = 831, Flowtime = 0, Runtime = 212
+Iteration 11, Neighborhood size 128, Makespan = 748, Flowtime = 0, Runtime = 214
+Iteration 12, Neighborhood size 128, Makespan = 689, Flowtime = 0, Runtime = 216
+Iteration 13, Neighborhood size 128, Makespan = 650, Flowtime = 0, Runtime = 218
+Iteration 14, Neighborhood size 128, Makespan = 585, Flowtime = 0, Runtime = 220
+Iteration 15, Neighborhood size 128, Makespan = 577, Flowtime = 0, Runtime = 222
+Iteration 24, Neighborhood size 128, Makespan = 573, Flowtime = 0, Runtime = 239
+Iteration 32, Neighborhood size 128, Makespan = 525, Flowtime = 0, Runtime = 254
